@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.booknest</groupId>
+    <artifactId>booknest-backend</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>BookNest Aggregator</name>
+
+    <modules>
+        <module>common-lib</module>
+        <module>test-utils</module>
+        <module>api-gateway</module>
+        <module>discovery-server</module>
+        <module>auth-service</module>
+        <module>book-service</module>
+        <module>cart-service</module>
+        <module>order-service</module>
+        <module>wallet-service</module>
+        <module>review-service</module>
+        <module>wishlist-service</module>
+        <module>notification-service</module>
+    </modules>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        
+        <!-- Centralized SonarQube Configuration -->
+        <sonar.projectKey>booknest</sonar.projectKey>
+        <sonar.projectName>BookNest</sonar.projectName>
+        <sonar.host.url>http://localhost:9000</sonar.host.url>
+        
+        <!-- Aggregated JaCoCo Path -->
+        <sonar.coverage.jacoco.xmlReportPaths>
+            **/target/site/jacoco/jacoco.xml
+        </sonar.coverage.jacoco.xmlReportPaths>
+        
+        <!-- Global Exclusions -->
+        <sonar.exclusions>
+            **/dto/**,
+            **/entity/**,
+            **/config/**,
+            **/exception/**,
+            **/*Application.java,
+            **/security/SecurityConfig.java,
+            **/security/CustomUserDetails.java,
+            **/test-utils/**
+        </sonar.exclusions>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>3.11.0.3922</version>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.11</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

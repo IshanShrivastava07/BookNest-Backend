@@ -1,0 +1,107 @@
+server:
+  port: 8081
+  forward-headers-strategy: framework
+
+gateway:
+  secret: booknest-gateway-internal-secret-key-2026-secure-abcdef123456
+
+spring:
+  application:
+    name: auth-service
+
+  profiles:
+    active: dev
+
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    # Set MAIL_USERNAME / MAIL_PASSWORD in env (see backend/.env.example). Gmail: use an App Password (Google Account → Security → 2-Step Verification → App passwords), not your normal login password.
+    # Local fallback (uncomment and replace — do not commit real credentials):
+    # username: your_email@gmail.com
+    # password: your_app_password
+    username: ${MAIL_USERNAME:ishansh77@gmail.com}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope:
+              - email
+              - profile
+
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:3306/auth_db?createDatabaseIfNotExist=true
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:Frustum@7#}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 2000ms
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+
+eureka:
+  instance:
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:localhost}
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+
+  datasource:
+    url: jdbc:mysql://mysql:3306/auth_db?createDatabaseIfNotExist=true
+  
+  data:
+    redis:
+      host: redis
+  
+  rabbitmq:
+    host: rabbitmq
+
+eureka:
+  instance:
+    hostname: auth-service
+  client:
+    service-url:
+      defaultZone: http://discovery-server:8761/eureka
+
+app:
+  frontend-url: ${FRONTEND_URL:http://localhost:5173}
+
+security:
+  jwt:
+    secret: ${JWT_SECRET}
+
+logging:
+  level:
+    root: INFO
+    com.booknest: INFO
+  pattern:
+    console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wEx"

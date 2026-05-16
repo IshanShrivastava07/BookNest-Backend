@@ -1,0 +1,111 @@
+server:
+  port: 8080
+
+gateway:
+  secret: booknest-gateway-internal-secret-key-2026-secure-abcdef123456
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOriginPatterns: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
+      routes:
+        - id: auth-service-public
+          uri: lb://auth-service
+          predicates:
+            - Path=/auth/**
+
+        - id: auth-service-admin
+          uri: lb://auth-service
+          predicates:
+            - Path=/admin/**
+
+        - id: oauth2-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/oauth2/**
+
+        - id: login-oauth2-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/login/oauth2/**
+
+        - id: book-service
+          uri: lb://book-service
+          predicates:
+            - Path=/books/**
+
+        - id: cart-service
+          uri: lb://cart-service
+          predicates:
+            - Path=/cart/**
+
+        - id: order-service
+          uri: lb://order-service
+          predicates:
+            - Path=/orders/**
+
+        - id: wallet-service
+          uri: lb://wallet-service
+          predicates:
+            - Path=/wallet/**
+
+        - id: review-service
+          uri: lb://review-service
+          predicates:
+            - Path=/reviews/**
+
+        - id: wishlist-service
+          uri: lb://wishlist-service
+          predicates:
+            - Path=/wishlist/**
+
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/notifications/**
+
+eureka:
+  instance:
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:localhost}
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+
+eureka:
+  instance:
+    hostname: api-gateway
+  client:
+    service-url:
+      defaultZone: http://discovery-server:8761/eureka
+
+security:
+  jwt:
+    secret: ${JWT_SECRET}
+
+logging:
+  level:
+    root: INFO
+    com.booknest: INFO
+  pattern:
+    console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wEx"

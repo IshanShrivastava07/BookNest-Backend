@@ -1,0 +1,42 @@
+server:
+    port: 8087
+
+spring:
+    application:
+        name: wishlist-service
+
+    datasource:
+        url: jdbc:mysql://${DB_HOST:localhost}:3306/wishlist_db?createDatabaseIfNotExist=true
+        username: ${DB_USERNAME:root}
+        password: ${DB_PASSWORD:Frustum@7#}
+
+    jpa:
+        hibernate:
+            ddl-auto: update
+        show-sql: true
+gateway:
+  secret: booknest-gateway-internal-secret-key-2026-secure-abcdef123456
+
+eureka:
+    instance:
+        hostname: ${EUREKA_INSTANCE_HOSTNAME:localhost}
+        prefer-ip-address: true
+    client:
+        service-url:
+            defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+
+  datasource:
+    url: jdbc:mysql://mysql:3306/wishlist_db?createDatabaseIfNotExist=true
+
+eureka:
+  instance:
+    hostname: wishlist-service
+  client:
+    service-url:
+      defaultZone: http://discovery-server:8761/eureka
