@@ -71,6 +71,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - JWT_SECRET=${JWT_SECRET}
+      - FRONTEND_URL=${FRONTEND_URL}
     depends_on:
       discovery-server:
         condition: service_started
@@ -87,6 +88,7 @@ services:
       - DB_PASSWORD=${DB_PASSWORD:-Frustum@7#}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - FRONTEND_URL=${FRONTEND_URL}
     depends_on:
       mysql:
         condition: service_healthy

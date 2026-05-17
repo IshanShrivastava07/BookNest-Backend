@@ -13,7 +13,10 @@ spring:
       globalcors:
         cors-configurations:
           '[/**]':
-            allowedOriginPatterns: "*"
+            allowedOrigins:
+              - "http://localhost:5173"
+              - "http://localhost:3000"
+              - "${FRONTEND_URL:https://booknest-app.netlify.app}"
             allowedMethods:
               - GET
               - POST
