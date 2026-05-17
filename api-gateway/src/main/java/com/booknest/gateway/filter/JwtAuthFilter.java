@@ -72,7 +72,7 @@ public class JwtAuthFilter implements GlobalFilter {
 
         if (isPublicPath(path) && !isAdminOnlyPath(path, method)) {
             ServerHttpRequest modifiedRequest = request.mutate()
-                    .header("X-Gateway-Secret", gatewaySecret)
+                    .headers(httpHeaders -> httpHeaders.set("X-Gateway-Secret", gatewaySecret))
                     .build();
             return chain.filter(exchange.mutate().request(modifiedRequest).build());
         }
@@ -111,10 +111,12 @@ public class JwtAuthFilter implements GlobalFilter {
         }
 
         ServerHttpRequest modifiedRequest = request.mutate()
-                .header("X-Gateway-Secret", gatewaySecret)
-                .header("X-User-Id", String.valueOf(userId))
-                .header("X-User-Email", email != null ? email : "")
-                .header("X-User-Role", role != null ? role : "")
+                .headers(httpHeaders -> {
+                    httpHeaders.set("X-Gateway-Secret", gatewaySecret);
+                    httpHeaders.set("X-User-Id", String.valueOf(userId));
+                    httpHeaders.set("X-User-Email", email != null ? email : "");
+                    httpHeaders.set("X-User-Role", role != null ? role : "");
+                })
                 .build();
 
         return chain.filter(exchange.mutate().request(modifiedRequest).build());
