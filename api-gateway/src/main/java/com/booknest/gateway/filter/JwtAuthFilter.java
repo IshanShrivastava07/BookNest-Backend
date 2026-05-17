@@ -71,9 +71,15 @@ public class JwtAuthFilter implements GlobalFilter {
         }
 
         if (isPublicPath(path) && !isAdminOnlyPath(path, method)) {
-            ServerHttpRequest modifiedRequest = request.mutate()
-                    .headers(httpHeaders -> httpHeaders.set("X-Gateway-Secret", gatewaySecret))
-                    .build();
+            ServerHttpRequest modifiedRequest = new org.springframework.http.server.reactive.ServerHttpRequestDecorator(request) {
+                @Override
+                public HttpHeaders getHeaders() {
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.putAll(super.getHeaders());
+                    headers.set("X-Gateway-Secret", gatewaySecret);
+                    return HttpHeaders.readOnlyHttpHeaders(headers);
+                }
+            };
             return chain.filter(exchange.mutate().request(modifiedRequest).build());
         }
 
@@ -110,15 +116,18 @@ public class JwtAuthFilter implements GlobalFilter {
             return onError(exchange, "SOURCE: GATEWAY | Admin role required", HttpStatus.FORBIDDEN);
         }
 
-        ServerHttpRequest modifiedRequest = request.mutate()
-                .headers(httpHeaders -> {
-                    httpHeaders.set("X-Gateway-Secret", gatewaySecret);
-                    httpHeaders.set("X-User-Id", String.valueOf(userId));
-                    httpHeaders.set("X-User-Email", email != null ? email : "");
-                    httpHeaders.set("X-User-Role", role != null ? role : "");
-                })
-                .build();
-
+        ServerHttpRequest modifiedRequest = new org.springframework.http.server.reactive.ServerHttpRequestDecorator(request) {
+            @Override
+            public HttpHeaders getHeaders() {
+                HttpHeaders headers = new HttpHeaders();
+                headers.putAll(super.getHeaders());
+                headers.set("X-Gateway-Secret", gatewaySecret);
+                headers.set("X-User-Id", String.valueOf(userId));
+                headers.set("X-User-Email", email != null ? email : "");
+                headers.set("X-User-Role", role != null ? role : "");
+                return HttpHeaders.readOnlyHttpHeaders(headers);
+            }
+        };
         return chain.filter(exchange.mutate().request(modifiedRequest).build());
     }
 
