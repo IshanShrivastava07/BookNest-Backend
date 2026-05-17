@@ -86,8 +86,8 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
       - JWT_SECRET=${JWT_SECRET}
       - DB_PASSWORD=${DB_PASSWORD:-Frustum@7#}
-      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-dummy-google-client-id}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-dummy-google-client-secret}
       - FRONTEND_URL=${FRONTEND_URL}
     depends_on:
       mysql:
