@@ -53,11 +53,11 @@ public class JwtAuthFilter implements GlobalFilter {
             return true;
         }
         // Catalog browse is public; write operations are admin-only.
-        if (path.startsWith("/books") && method != HttpMethod.GET) {
+        if (path.startsWith("/books") && !method.matches("GET")) {
             return true;
         }
         // Order status changes should be admin-only.
-        return path.matches("^/orders/\\d+/status$") && method == HttpMethod.PUT;
+        return path.matches("^/orders/\\d+/status$") && method.matches("PUT");
     }
 
     @Override
@@ -66,7 +66,7 @@ public class JwtAuthFilter implements GlobalFilter {
         String path = request.getURI().getPath();
         HttpMethod method = request.getMethod();
 
-        if (method == HttpMethod.OPTIONS) {
+        if (method.matches("OPTIONS")) {
             return chain.filter(exchange);
         }
 
