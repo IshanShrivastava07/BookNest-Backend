@@ -10,4 +10,6 @@ public interface AuthService {
 	String verifyOtp(String email, String otp);
     String resendOtp(String email);
     UserResponse getMe(String token);
+    String requestPasswordReset(String email);
+    String resetPassword(String email, String otp, String newPassword);
 }

@@ -41,6 +41,16 @@ package com.booknest.auth_service.controller;
     public String resendOtp(@RequestParam String email) {
         return service.resendOtp(email);
     }
+
+    @PostMapping("/forgot-password")
+    public String forgotPassword(@RequestParam String email) {
+        return service.requestPasswordReset(email);
+    }
+
+    @PostMapping("/reset-password")
+    public String resetPassword(@Valid @RequestBody com.booknest.auth_service.dto.ResetPasswordRequest request) {
+        return service.resetPassword(request.getEmail(), request.getOtp(), request.getNewPassword());
+    }
      
      @GetMapping("/me")
      public UserResponse getMe(@RequestHeader("Authorization") String authHeader) {

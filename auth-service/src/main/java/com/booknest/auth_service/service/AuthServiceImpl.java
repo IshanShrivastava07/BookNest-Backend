@@ -169,6 +169,63 @@ public class AuthServiceImpl implements AuthService {
          return response;
      }
  
+    @Override
+    public String requestPasswordReset(String email) {
+        String normalizedEmail = email.trim().toLowerCase();
+        User user = repo.findByEmail(normalizedEmail)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + normalizedEmail));
+        
+        String otp = String.format("%06d", new Random().nextInt(999999));
+        user.setOtp(otp);
+        user.setOtpExpiry(LocalDateTime.now().plusMinutes(OTP_EXPIRY_MINUTES));
+        
+        repo.save(user);
+        cacheOtp(user.getEmail(), otp);
+
+        try {
+            emailService.sendPasswordResetOtp(user.getEmail(), otp);
+            log.info("Password reset OTP sent to email: {}", user.getEmail());
+        } catch (Exception e) {
+            log.error("Failed to send password reset OTP to email: {}. Error: {}", user.getEmail(), e.getMessage());
+            throw new RuntimeException("Failed to send password reset email. Please try again.");
+        }
+
+        return "Password reset OTP sent to email.";
+    }
+
+    @Override
+    public String resetPassword(String email, String otp, String newPassword) {
+        String normalizedEmail = email.trim().toLowerCase();
+        User user = repo.findByEmail(normalizedEmail)
+                .orElseThrow(() -> new RuntimeException("User not found with email: " + normalizedEmail));
+
+        boolean isValid = false;
+        String cachedOtp = getCachedOtp(normalizedEmail);
+        
+        if (cachedOtp != null && cachedOtp.equals(otp.trim())) {
+            isValid = true;
+        } else if (user.getOtp() != null && user.getOtp().equals(otp.trim())) {
+            // DB Fallback
+            if (user.getOtpExpiry() != null && user.getOtpExpiry().isBefore(LocalDateTime.now())) {
+                throw new RuntimeException("OTP has expired. Please request a new password reset.");
+            }
+            isValid = true;
+        }
+        
+        if (!isValid) {
+            log.warn("Invalid password reset OTP attempt for email: {}", normalizedEmail);
+            throw new RuntimeException("Invalid or expired OTP");
+        }
+
+        user.setPassword(encoder.encode(newPassword));
+        user.setOtp(null);
+        user.setOtpExpiry(null);
+        repo.save(user);
+        clearCachedOtp(normalizedEmail);
+
+        log.info("Password successfully reset for email: {}", normalizedEmail);
+        return "Password has been successfully reset.";
+    }
  
  
      private void cacheOtp(String email, String otp) {
