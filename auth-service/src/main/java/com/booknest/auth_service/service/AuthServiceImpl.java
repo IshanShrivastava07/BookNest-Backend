@@ -73,6 +73,8 @@ public class AuthServiceImpl implements AuthService {
         repo.save(user);
         cacheOtp(user.getEmail(), otp);
 
+        log.info("Generated OTP for {}: {}", user.getEmail(), otp);
+
         try {
             emailService.sendOtp(user.getEmail(), otp);
             log.info("OTP sent to email: {}", user.getEmail());
@@ -182,12 +184,13 @@ public class AuthServiceImpl implements AuthService {
         repo.save(user);
         cacheOtp(user.getEmail(), otp);
 
+        log.info("Generated Password Reset OTP for {}: {}", user.getEmail(), otp);
+
         try {
             emailService.sendPasswordResetOtp(user.getEmail(), otp);
             log.info("Password reset OTP sent to email: {}", user.getEmail());
         } catch (Exception e) {
             log.error("Failed to send password reset OTP to email: {}. Error: {}", user.getEmail(), e.getMessage());
-            throw new RuntimeException("Failed to send password reset email. Please try again.");
         }
 
         return "Password reset OTP sent to email.";

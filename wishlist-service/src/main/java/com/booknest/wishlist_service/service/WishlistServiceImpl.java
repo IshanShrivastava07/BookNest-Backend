@@ -52,16 +52,43 @@ public class WishlistServiceImpl implements WishlistService {
         item.setBookId(book.getBookId());
         item.setBookTitle(book.getTitle());
         item.setPrice(book.getPrice());
+        item.setCoverImage(book.getCoverImage());
+        item.setAuthor(book.getAuthor());
         return itemRepo.save(item);
     }
 
     @Override
+    @Transactional
     public List<WishlistItem> getWishlist(Long userId) {
         Wishlist wishlist = wishlistRepo.findByUserId(userId);
         if (wishlist == null) {
             return List.of();
         }
-        return itemRepo.findByWishlistId(wishlist.getWishlistId());
+        List<WishlistItem> items = itemRepo.findByWishlistId(wishlist.getWishlistId());
+        boolean hasUpdates = false;
+        for (WishlistItem item : items) {
+            if (item.getCoverImage() == null || item.getAuthor() == null) {
+                try {
+                    BookDto book = bookClient.getBookById(item.getBookId());
+                    if (book != null) {
+                        if (item.getCoverImage() == null) {
+                            item.setCoverImage(book.getCoverImage());
+                            hasUpdates = true;
+                        }
+                        if (item.getAuthor() == null) {
+                            item.setAuthor(book.getAuthor());
+                            hasUpdates = true;
+                        }
+                        if (hasUpdates) {
+                            itemRepo.save(item);
+                        }
+                    }
+                } catch (Exception e) {
+                    // Ignore resiliently to ensure service reliability
+                }
+            }
+        }
+        return items;
     }
 
     @Override

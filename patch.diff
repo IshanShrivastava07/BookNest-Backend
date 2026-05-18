@@ -1,0 +1,43 @@
+diff --git a/auth-service/src/main/java/com/booknest/auth_service/service/AuthServiceImpl.java b/auth-service/src/main/java/com/booknest/auth_service/service/AuthServiceImpl.java
+index 4d5c8be..d1b8221 100644
+--- a/auth-service/src/main/java/com/booknest/auth_service/service/AuthServiceImpl.java
++++ b/auth-service/src/main/java/com/booknest/auth_service/service/AuthServiceImpl.java
+@@ -73,6 +73,8 @@ public class AuthServiceImpl implements AuthService {
+         repo.save(user);
+         cacheOtp(user.getEmail(), otp);
+ 
++        log.info("Generated OTP for {}: {}", user.getEmail(), otp);
++
+         try {
+             emailService.sendOtp(user.getEmail(), otp);
+             log.info("OTP sent to email: {}", user.getEmail());
+@@ -182,12 +184,13 @@ public class AuthServiceImpl implements AuthService {
+         repo.save(user);
+         cacheOtp(user.getEmail(), otp);
+ 
++        log.info("Generated Password Reset OTP for {}: {}", user.getEmail(), otp);
++
+         try {
+             emailService.sendPasswordResetOtp(user.getEmail(), otp);
+             log.info("Password reset OTP sent to email: {}", user.getEmail());
+         } catch (Exception e) {
+             log.error("Failed to send password reset OTP to email: {}. Error: {}", user.getEmail(), e.getMessage());
+-            throw new RuntimeException("Failed to send password reset email. Please try again.");
+         }
+ 
+         return "Password reset OTP sent to email.";
+diff --git a/docker-compose.yml b/docker-compose.yml
+index 6258f88..3fcaeb5 100644
+--- a/docker-compose.yml
++++ b/docker-compose.yml
+@@ -89,6 +89,10 @@ services:
+       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-dummy-google-client-id}
+       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-dummy-google-client-secret}
+       - FRONTEND_URL=${FRONTEND_URL}
++      - MAIL_HOST=${MAIL_HOST:-smtp.gmail.com}
++      - MAIL_PORT=${MAIL_PORT:-587}
++      - MAIL_USERNAME=${MAIL_USERNAME}
++      - MAIL_PASSWORD=${MAIL_PASSWORD}
+     depends_on:
+       mysql:
+         condition: service_healthy

@@ -15,4 +15,6 @@ public class WishlistItem {
     private Long bookId;
     private String bookTitle;
     private double price;
+    private String coverImage;
+    private String author;
 }
